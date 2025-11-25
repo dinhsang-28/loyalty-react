@@ -26,7 +26,7 @@ const LoginPage = () => {
         title: 'Success',
         description: 'Logged in successfully',
       });
-      navigate('/dashboard');
+      // navigate('/dashboard');
     } catch (error) {
       toast({
         title: 'Error',
@@ -92,9 +92,9 @@ const LoginPage = () => {
 
           <p className="text-center text-muted-foreground mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-primary hover:underline">
+            {/* <Link to="/register" className="text-primary hover:underline">
               Register
-            </Link>
+            </Link> */}
           </p>
         </Card>
       </div>
