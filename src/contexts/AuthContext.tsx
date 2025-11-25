@@ -30,6 +30,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
+    console.log("data StoredToken:",storedToken);
+    console.log("data storedUser:",storedUser);
     
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -38,12 +40,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setLoading(false);
   }, []);
-  let https = 'http://localhost:3000'
+  let https = 'https://loyaty-be.onrender.com'
+  // let https = 'https://loyaty-be.onrender.com'
   const login = async (phone: string, password: string) => {
     try {
       const response = await axios.post(`${https}/api/auth/login`, { phone, password });
       console.log("data:",response.data);
       const { token: newToken, data: authData} = response.data;
+      console.log("Token - Data :",newToken , authData)
       const userData: User = {
         id: authData.userId,
         memberId: authData.memberId,

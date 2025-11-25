@@ -26,7 +26,7 @@ const LoginPage = () => {
         title: 'Success',
         description: 'Logged in successfully',
       });
-      navigate('/profile');
+      navigate('/dashboard');
     } catch (error) {
       toast({
         title: 'Error',

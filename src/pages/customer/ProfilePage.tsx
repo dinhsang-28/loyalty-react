@@ -1,132 +1,262 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Card } from '../../components/ui/card';
-import { Avatar, AvatarFallback } from '../../components/ui/avatar';
-import { Badge } from '../../components/ui/badge';
-import { AwardIcon, TrendingUpIcon } from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '../../components/ui/card';
+import { Label } from '../../components/ui/label';
+import { Input } from '../../components/ui/input';
+import { Button } from '../../components/ui/button';
+import { useToast } from '../../hooks/use-toast';  // <-- 1. Import useToast
+import {
+  Loader2,
+  User,
+  Phone,
+  Mail
+} from 'lucide-react'; // <-- 2. Xóa AlertCircle, CheckCircle
 import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 
-// 1. SỬA LỖI: Cập nhật Interface
-// Interface 'Tier' phải là một object lồng nhau
 interface TierData {
   _id: string;
   name: string;
   min_points: number;
-  // Thêm các trường khác của Tier nếu cần
 }
 
 interface ProfileData {
+  _id: string
   name: string;
   phone: string;
-  email: string;
-  tier: TierData; // <-- Sửa từ 'string' thành 'TierData'
+  user:{
+    email:string
+  };
+  tier: TierData;
   points: number;
   isAffiliate: boolean;
+}
+interface formData {
+  name: string,
+  phone: string,
+  email: string
 }
 
 const ProfilePage = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [formData, setFormData] = useState<formData>({
+    name: '',
+    phone: '',
+    email: ''
+  });
+  const [memberId, setMemberId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  // const https = 'https://loyaty-be.onrender.com/api';
+  const https = 'https://loyaty-be.onrender.com';
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-
+    window.scroll(0, 0);
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem('token')
+        const token = localStorage.getItem('token');
         if (!token) {
-          setLoading(false); // Đặt loading false nếu không có token
+          setLoading(false);
+          toast({
+            title: "Lỗi",
+            description: "Bạn cần đăng nhập để chỉnh sửa thông tin.",
+          })
           return;
         }
-        const response = await axios.get('http://localhost:3000/api/loyalty/profile', {
+        const respone = await axios.get(`${https}/loyalty/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setProfile(response.data.data);
+        const profile: ProfileData = respone.data.data;
+        console.log("data respone:",respone.data.data);
+        setFormData({
+          name: profile.name,
+          phone: profile.phone,
+          email: profile.user.email,
+        });
+        setMemberId(profile._id);
       } catch (error) {
-        console.error('Failed to fetch profile:', error);
-      } finally {
+        console.error("fetch profile data khong thanh cong:", error);
+        toast({
+          title: "Lỗi tải dữ liệu",
+          description: "Không thể tải thông tin cá nhân. Vui lòng thử lại.",
+          variant: "destructive",
+        });
+      }
+      finally {
         setLoading(false);
       }
-    };
-
-    fetchProfile();
-  }, []);
-
-  // 2. SỬA LỖI: Di chuyển các đoạn return loading/error lên TRƯỚC
-  // Phải kiểm tra loading trước
+    }
+    if (user) {
+      fetchProfile();
+    }
+    else {
+      setLoading(false);
+    }
+  }, [user, toast]);
+  console.log("data:",formData)
+  // ham xu ly khi thay doi input
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  };
+  // ham xu ly thay doi
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!memberId) {
+      toast({
+        title: "Lỗi",
+        description: "Không tìm thấy ID thành viên. Không thể cập nhật.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        toast({
+          title: "Lỗi",
+          description: "Bạn cần đăng nhập để chỉnh sửa thông tin.",
+        })
+        return;
+      }
+      const response = await axios.patch(`${https}/api/loyalty/edit/${memberId}`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast({
+        title: "Thành công!",
+        description: response.data.message || "Cập nhật thông tin thành công!",
+        className: "bg-green-500 text-white",
+      });
+      setTimeout(() => {
+        navigate('/profile')
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      // 7. Thay thế setError bằng toast
+      const errorMessage = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+      toast({
+        title: "Cập nhật thất bại",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+    finally {
+      setLoading(false)
+    }
+  };
   if (loading) {
     return (
       <div className="min-h-screen py-16 px-4 lg:px-8 bg-background flex justify-center items-center">
-        <p className="text-muted-foreground">Loading profile...</p>
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="ml-3 text-muted-foreground">Đang tải dữ liệu...</p>
       </div>
     );
   }
-
-  // Kiểm tra nếu không có user (chưa login) hoặc không load được profile
-  if (!user || !profile) {
+  if (!user || !memberId) {
     return (
       <div className="min-h-screen py-16 px-4 lg:px-8 bg-background flex justify-center items-center">
-        <p className="text-muted-foreground">Could not load profile. Please login again.</p>
+        <p className="text-muted-foreground">Vui lòng đăng nhập lại.</p>
       </div>
     );
   }
-
-  // 3. SỬA LỖI: Chỉ tính 'initials' sau khi đã chắc chắn 'profile' tồn tại
-  const initials = profile.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
-
   return (
     <div className="min-h-screen py-16 px-4 lg:px-8 bg-background">
       <div className="container mx-auto max-w-lg">
-        <h1 className="font-headline text-3xl lg:text-4xl font-bold text-foreground mb-8 text-center">
-          My Profile
-        </h1>
-
-        <div>
-          <Card className="p-6 bg-card text-card-foreground border-border w-full">
-            <div className="flex flex-col items-center text-center">
-              <Avatar className="w-24 h-24 mb-4">
-                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                  {initials}
-                </AvatarFallback>
-                T      </Avatar>
-              <h2 className="font-headline text-xl font-semibold text-foreground mb-2">
-                {profile.name}
-              </h2>
-              <p className="text-muted-foreground mb-4">{profile.email}</p>
-
-              {/* 4. SỬA LỖI: Hiển thị 'profile.tier.name' */}
-              <Badge className="bg-accent text-accent-foreground mb-6">{profile.tier.name}</Badge>
-
-              <div className="w-full space-y-4">
-                <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <AwardIcon className="w-6 h-6 text-primary" />
-                    <span className="text-foreground font-normal">Points</span>
-                  </div>
-                  <span className="font-headline text-xl font-bold text-foreground">
-                    {profile.points}
-                  </span>
+        <Card className="bg-card text-card-foreground border-border w-full shadow-lg">
+          <CardHeader className="text-center">
+            <CardTitle className="font-headline text-3xl lg:text-4xl font-bold text-foreground">
+              Chỉnh Sửa Thông Tin
+            </CardTitle>
+            <CardDescription>
+              Cập nhật thông tin cá nhân của bạn.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="name">Họ và Tên</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="pl-9"
+                  />
                 </div>
-
-                {/* Dùng user.isAffiliate từ AuthContext là đúng */}
-                {user.isAffiliate && (
-                  <div className="flex items-center justify-between p-4 bg-tertiary/10 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <TrendingUpIcon className="w-6 h-6 text-tertiary" />
-                      <span className="text-foreground font-normal">Affiliate</span>
-                    </div>
-                    <Badge className="bg-tertiary text-tertiary-foreground">Active</Badge>
-                  </div>
-                )}
               </div>
-            </div>
-          </Card>
-        </div>
+
+              {/* Input Số Điện Thoại */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">Số Điện Thoại</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/Z-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+
+              {/* Input Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+
+              {/* Nút Submit và Hủy */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={submitting}
+                >
+                  {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {submitting ? 'Đang lưu...' : 'Lưu Thay Đổi'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  asChild
+                >
+                  <Link to="/profile">Hủy</Link>
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

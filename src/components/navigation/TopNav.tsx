@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
-import { MenuIcon, UserIcon, LogOutIcon } from 'lucide-react';
+import { MenuIcon, LogOutIcon } from 'lucide-react';
 import { useState } from 'react';
 
 const TopNav = () => {
@@ -44,16 +44,22 @@ const TopNav = () => {
               >
                 Login
               </Link>
-              <Link to="/register">
+              {/* <Link to="/register">
                 <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                   Register
                 </Button>
-              </Link>
+              </Link> */}
             </>
           )}
 
-          {user && !user.isAdmin && (
+          {user && !user.isAdmin &&  (
             <>
+            <Link
+                to="/dashboard"
+                className={`text-foreground hover:text-primary transition-smooth cursor-pointer ${
+                  isActive('/dashboard') ? 'text-primary font-semibold' : ''
+                }`}
+              >Home</Link>
               <Link
                 to="/profile"
                 className={`text-foreground hover:text-primary transition-smooth cursor-pointer ${
@@ -70,6 +76,16 @@ const TopNav = () => {
               >
                 Rewards
               </Link>
+              {!user.isAffiliate &&(
+              <Link
+                to="/register/affiliate"
+                className={`text-foreground hover:text-primary transition-smooth cursor-pointer ${
+                  isActive('/register/affiliate') ? 'text-primary font-semibold' : ''
+                }`}
+              >
+                Đăng Kí Affiliate
+              </Link>
+              )}
               <Link
                 to="/checkout"
                 className={`text-foreground hover:text-primary transition-smooth cursor-pointer ${
@@ -101,6 +117,14 @@ const TopNav = () => {
 
           {user && user.isAdmin && (
             <>
+            {/* <Link
+                to="/dashboard"
+                className={`text-foreground hover:text-primary transition-smooth cursor-pointer ${
+                  location.pathname.startsWith('/dashboard') ? 'text-primary font-semibold' : ''
+                }`}
+              > */}
+                {/* Admin */}
+              {/* </Link> */}
               <Link
                 to="/admin"
                 className={`text-foreground hover:text-primary transition-smooth cursor-pointer ${

@@ -15,11 +15,13 @@ import { useToast } from '../../hooks/use-toast';
 import axios from 'axios';
 
 interface Member {
-  id: string;
+  _id: string;
   name: string;
-  email: string;
-  points: number;
-  tier: string;
+  phone: string;
+  redeemablePoints: number;
+  tier:{
+    name:string
+  };
 }
 
 const AdminLoyaltyMembers = () => {
@@ -28,6 +30,7 @@ const AdminLoyaltyMembers = () => {
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [pointsAdjustment, setPointsAdjustment] = useState('');
   const { toast } = useToast();
+  const https = "https://loyaty-be.onrender.com";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -36,12 +39,13 @@ const AdminLoyaltyMembers = () => {
 
   const fetchMembers = async () => {
     try {
-      const response = await axios.get('/api/admin/loyalty/members');
-      setMembers(response.data);
+      const response = await axios.get(`${https}/api/admin/loyalty/members`);
+      setMembers(response.data.data);
     } catch (error) {
       console.error('Failed to fetch members:', error);
     }
   };
+  console.log("Data members:",members);
 
   const handleAdjustPoints = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +53,8 @@ const AdminLoyaltyMembers = () => {
     if (!editingMember) return;
 
     try {
-      await axios.post(`/api/admin/loyalty/members/${editingMember.id}/adjust-points`, {
-        points: parseInt(pointsAdjustment),
+      await axios.post(`${https}/api/admin/loyalty/members/adjust-points/${editingMember._id}`, {
+        amount: parseInt(pointsAdjustment),
       });
       toast({ title: 'Success', description: 'Points adjusted successfully' });
       fetchMembers();
@@ -77,19 +81,19 @@ const AdminLoyaltyMembers = () => {
             <thead className="bg-muted">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Name</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Email</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Phone</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Points</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Tier</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {members.map((member) => (
-                <tr key={member.id} className="hover:bg-muted/50 transition-smooth">
+              {members && members.map((member) => (
+                <tr key={member._id} className="hover:bg-muted/50 transition-smooth">
                   <td className="px-6 py-4 text-foreground">{member.name}</td>
-                  <td className="px-6 py-4 text-foreground">{member.email}</td>
-                  <td className="px-6 py-4 text-foreground">{member.points}</td>
-                  <td className="px-6 py-4 text-foreground">{member.tier}</td>
+                  <td className="px-6 py-4 text-foreground">{member.phone}</td>
+                  <td className="px-6 py-4 text-foreground">{member.redeemablePoints}</td>
+                  <td className="px-6 py-4 text-foreground">{member.tier.name}</td>
                   <td className="px-6 py-4">
                     <Button
                       onClick={() => handleEdit(member)}
@@ -117,7 +121,7 @@ const AdminLoyaltyMembers = () => {
             <form onSubmit={handleAdjustPoints} className="space-y-4">
               <div>
                 <p className="text-foreground mb-2">
-                  Member: {editingMember.name} (Current: {editingMember.points} points)
+                  Member: {editingMember.name} (Current: {editingMember.redeemablePoints} points)
                 </p>
               </div>
               <div>

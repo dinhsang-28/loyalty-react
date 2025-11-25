@@ -34,7 +34,7 @@ const HomePage = () => {
               all-in-one platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/register">
+              <Link to="/login">
                 <Button size="lg" className="bg-white text-purple-700 hover:bg-purple-500 hover:text-white">
                   Get Started
                 </Button>
@@ -112,11 +112,11 @@ const HomePage = () => {
               Join thousands of businesses using LoyaltyHub to grow their customer base and
               affiliate network.
             </p>
-            <Link to="/register">
+            {/* <Link to="/register">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Create Your Account
               </Button>
-            </Link>
+            </Link> */}
           </div>
         </section>
       </div>

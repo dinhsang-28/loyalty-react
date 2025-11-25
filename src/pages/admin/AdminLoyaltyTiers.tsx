@@ -15,10 +15,13 @@ import { useToast } from '../../hooks/use-toast';
 import axios from 'axios';
 
 interface Tier {
-  id: string;
+  _id: string;
   name: string;
-  minPoints: number;
-  benefits: string;
+  min_points: number;
+  benefits: {
+    discount:number,
+    pointMultiplier:number
+  };
 }
 
 const AdminLoyaltyTiers = () => {
@@ -28,9 +31,11 @@ const AdminLoyaltyTiers = () => {
   const [formData, setFormData] = useState({
     name: '',
     minPoints: '',
-    benefits: '',
+    discount: '',
+    pointmultiplier:''
   });
   const { toast } = useToast();
+  const https = "https://loyaty-be.onrender.com";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -39,22 +44,31 @@ const AdminLoyaltyTiers = () => {
 
   const fetchTiers = async () => {
     try {
-      const response = await axios.get('/api/admin/loyalty/tiers');
-      setTiers(response.data);
+      const response = await axios.get(`${https}/api/admin/loyalty/tiers`);
+      setTiers(response.data.data);
     } catch (error) {
       console.error('Failed to fetch tiers:', error);
     }
   };
+  console.log("data tiers:",tiers);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      name:formData.name,
+      min_points:Number(formData.minPoints),
+      benefits:{
+        discount:Number(formData.discount),
+        pointMultiplier: Number(formData.pointmultiplier)
+      }
+    }
 
     try {
       if (editingTier) {
-        await axios.put(`/api/admin/loyalty/tiers/${editingTier.id}`, formData);
+        await axios.patch(`${https}/api/admin/loyalty/tiers/${editingTier._id}`, payload);
         toast({ title: 'Success', description: 'Tier updated successfully' });
       } else {
-        await axios.post('/api/admin/loyalty/tiers', formData);
+        await axios.post(`${https}/api/admin/loyalty/tiers`, payload);
         toast({ title: 'Success', description: 'Tier created successfully' });
       }
       fetchTiers();
@@ -67,7 +81,7 @@ const AdminLoyaltyTiers = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`/api/admin/loyalty/tiers/${id}`);
+      await axios.delete(`${https}/api/admin/loyalty/tiers/${id}`);
       toast({ title: 'Success', description: 'Tier deleted successfully' });
       fetchTiers();
     } catch (error) {
@@ -79,15 +93,16 @@ const AdminLoyaltyTiers = () => {
     setEditingTier(tier);
     setFormData({
       name: tier.name,
-      minPoints: tier.minPoints.toString(),
-      benefits: tier.benefits,
+      minPoints: tier.min_points.toString(),
+      discount: tier.benefits.discount.toString(),
+      pointmultiplier:tier.benefits.pointMultiplier.toString()
     });
     setIsDialogOpen(true);
   };
 
   const resetForm = () => {
     setEditingTier(null);
-    setFormData({ name: '', minPoints: '', benefits: '' });
+    setFormData({ name: '', minPoints: '', discount: '',pointmultiplier:'' });
   };
 
   return (
@@ -137,15 +152,25 @@ const AdminLoyaltyTiers = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="benefits" className="text-foreground">
-                  Benefits
+                <Label htmlFor="discount" className="text-foreground">
+                  Discount
                 </Label>
                 <Input
-                  id="benefits"
-                  value={formData.benefits}
-                  onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+                  id="discount"
+                  value={formData.discount}
+                  onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
                   required
                   className="mt-2 bg-background text-foreground border-border"
+                />
+              </div>
+              <div>
+                <Label htmlFor='point' className='text-foreground'>PointMultipier</Label>
+                <Input
+                id="point"
+                value={formData.pointmultiplier}
+                onChange={(e)=>setFormData({...formData,pointmultiplier:e.target.value})}
+                required
+                className='mt-2 bg-background text-foreground border-border'
                 />
               </div>
               <Button
@@ -160,13 +185,14 @@ const AdminLoyaltyTiers = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {tiers.map((tier) => (
-          <Card key={tier.id} className="p-6 bg-card text-card-foreground border-border">
+        {tiers && tiers.map((tier) => (
+          <Card key={tier._id} className="p-6 bg-card text-card-foreground border-border">
             <h3 className="font-headline text-xl font-semibold text-foreground mb-2">
               {tier.name}
             </h3>
-            <p className="text-muted-foreground mb-2">Min Points: {tier.minPoints}</p>
-            <p className="text-muted-foreground mb-4">{tier.benefits}</p>
+            <p className="text-muted-foreground mb-2">Min Points: {tier.min_points}</p>
+            <p className="text-muted-foreground mb-4">Discounts: {tier.benefits.discount}</p>
+             <p className="text-muted-foreground mb-4">PointMultiplier: {tier.benefits.pointMultiplier}</p>
             <div className="flex gap-2">
               <Button
                 onClick={() => handleEdit(tier)}
@@ -178,7 +204,7 @@ const AdminLoyaltyTiers = () => {
                 EditIcon
               </Button>
               <Button
-                onClick={() => handleDelete(tier.id)}
+                onClick={() => handleDelete(tier._id)}
                 variant="outline"
                 size="sm"
                 className="bg-background text-destructive border-border hover:bg-muted"
