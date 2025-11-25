@@ -161,8 +161,8 @@ const StaffDashboard = () => {
   };
 
   // --- Helper: Format Tiền tệ ---
-  const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+  // const formatCurrency = (val: number) => 
+  //   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 
   return (
     <div className="container mx-auto p-4 max-w-6xl space-y-6">

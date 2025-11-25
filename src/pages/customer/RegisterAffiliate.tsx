@@ -1,12 +1,10 @@
-import React,  { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
 import axios from 'axios';
 
 // Bạn có thể dùng icon từ thư viện (ví dụ heroicons) nếu muốn
 // import { ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline';
 
 const AffiliateRegister = () => {
-  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<any | null>(null);
