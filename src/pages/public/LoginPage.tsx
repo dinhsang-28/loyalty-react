@@ -6,13 +6,14 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card } from '../../components/ui/card';
 import { useToast } from '../../hooks/use-toast';
+import { useNavigate } from 'react-router';
 
 const LoginPage = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +26,7 @@ const LoginPage = () => {
         title: 'Success',
         description: 'Logged in successfully',
       });
-      // navigate('/dashboard');
+      navigate('/dashboard');
     } catch (error) {
       toast({
         title: 'Error',
