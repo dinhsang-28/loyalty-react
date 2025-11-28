@@ -31,7 +31,7 @@ const AdminLoyaltyUseCode = () => {
 
     setLoading(true);
     // Lưu ý: Đảm bảo base URL đúng với cấu hình server của bạn (có thể là /api/loyalty... hoặc /loyalty...)
-    const API_URL = "http://localhost:3000/api/admin/loyalty"; 
+    const API_URL = "https://loyaty-be.onrender.com/api/admin/loyalty"; 
 
     try {
       // Backend: [POST] /loyalty/use-code/:phone

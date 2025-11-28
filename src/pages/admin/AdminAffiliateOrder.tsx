@@ -32,6 +32,7 @@ const AdminAffiliateOrders = () => {
     fetchOrders();
   }, []);
   const https = "https://loyaty-be.onrender.com";
+  // const https = "http://localhost:3000";
 
   const fetchOrders = async () => {
     try {

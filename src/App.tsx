@@ -11,7 +11,7 @@ import AdminLayout from './layouts/AdminLayout';
 // Public Pages
 import HomePage from './pages/public/HomePage';
 import LoginPage from './pages/public/LoginPage';
-import RegisterPage from './pages/public/RegisterPage';
+// import RegisterPage from './pages/public/RegisterPage';
 import TrackPage from './pages/public/TrackPage';
 import StatsPage from './pages/public/StatsPage';
 
@@ -49,7 +49,7 @@ function App() {
             <Route element={<PublicLayout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+              {/* <Route path="/register" element={<RegisterPage />} /> */}
               <Route path="/track" element={<TrackPage />} />
               <Route path="/stats/:referral_code" element={<StatsPage />} />
             </Route>

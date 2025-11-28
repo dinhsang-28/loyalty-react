@@ -55,7 +55,7 @@ interface Redemption {
 // API Base URL
 // const API_URL = 'https://loyaty-be.onrender.com/api';
 // const https = 'https://loyaty-be.onrender.com/api';
-const https = 'https://loyaty-be.onrender.com';
+const https = 'https://loyaty-be.onrender.com/api';
 
 const LoyaltyDashboard = () => {
   const [member, setMember] = useState<Member | null>(null);
@@ -256,9 +256,9 @@ const LoyaltyDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {vouchers.length > 0 ? (
+              { vouchers.length > 0 ? (
                 vouchers
-                  .filter((v) => v.status === 'redeemed') // Chỉ hiển thị voucher chưa dùng
+                  .filter((v) => v.status === 'redeemed' && v.voucherId!==null) // Chỉ hiển thị voucher chưa dùng
                   .map((voucher) => (
                     <div
                       key={voucher._id}

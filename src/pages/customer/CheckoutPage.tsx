@@ -96,7 +96,7 @@ const CheckoutPage = () => {
   const [finalAmount, setFinalAmount] = useState(subtotal);
   const [discount, setDiscount] = useState(0);
    const https="https://loyaty-be.onrender.com"
-  // const https="https://loyaty-be.onrender.com"
+  // const https="http://localhost:3000"
   useEffect(() => {
     setFinalAmount(Math.max(0, subtotal - discount));
   }, [subtotal, discount]);

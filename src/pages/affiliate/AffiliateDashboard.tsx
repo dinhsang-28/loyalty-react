@@ -43,9 +43,9 @@ const AffiliateDashboard = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const https = "https://loyaty-be.onrender.com";
+  // const https = "http://localhost:3000";
 
   // --- HÀM FORMAT TIỀN TỆ ---
-  // Bạn có thể đổi 'USD' thành 'VND' và 'en-US' thành 'vi-VN' nếu muốn hiển thị tiền Việt
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
